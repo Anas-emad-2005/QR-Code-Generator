@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Code Generator</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+</head>
+<body>
+  <main class="page-wrapper">
+    <section class="hero-card">
+      <div class="hero-content">
+        <span class="badge">Anas Emad</span>
+        <h1>QR Code Generator</h1>
+        <p>أداة بسيطة واحترافية لتوليد QR Code من أي رابط، مع تخصيص اللون والحجم وتحميله بعدة صيغ.</p>
+      </div>
+    </section>
+
+    <section class="dashboard">
+      <form class="control-panel" id="qrForm">
+        <div class="section-title">
+          <h2>الإعدادات</h2>
+          <p>أدخل الرابط وعدّل خيارات التصميم.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="urlInput">الرابط</label>
+          <div class="input-row">
+            <input type="url" id="urlInput" placeholder="https://example.com" autocomplete="off" />
+            <button type="button" class="secondary-btn" id="copyBtn">نسخ</button>
+          </div>
+          <small id="urlError" class="error-text"></small>
+        </div>
+
+        <div class="form-group">
+          <label>ألوان جاهزة</label>
+          <div class="color-options" id="presetColors">
+            <button type="button" class="color-dot active" data-color="#111827" style="--dot-color:#111827" aria-label="أسود"></button>
+            <button type="button" class="color-dot" data-color="#0f172a" style="--dot-color:#0f172a" aria-label="أزرق غامق"></button>
+            <button type="button" class="color-dot" data-color="#14532d" style="--dot-color:#14532d" aria-label="أخضر غامق"></button>
+            <button type="button" class="color-dot" data-color="#7f1d1d" style="--dot-color:#7f1d1d" aria-label="أحمر غامق"></button>
+            <button type="button" class="color-dot" data-color="#581c87" style="--dot-color:#581c87" aria-label="بنفسجي"></button>
+            <button type="button" class="color-dot" data-color="#374151" style="--dot-color:#374151" aria-label="رمادي غامق"></button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="customColor">لون مخصص</label>
+            <input type="color" id="customColor" value="#111827" />
+          </div>
+
+          <div class="form-group">
+            <label for="backgroundColor">لون الخلفية</label>
+            <input type="color" id="backgroundColor" value="#ffffff" />
+          </div>
+        </div>
+
+        <div class="warning-box" id="contrastWarning">
+          تنبيه: التباين بين لون QR والخلفية ضعيف. قد لا تتمكن الكاميرا من قراءة الكود.
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="qrSize">حجم QR Code</label>
+            <select id="qrSize">
+              <option value="200">200x200</option>
+              <option value="300" selected>300x300</option>
+              <option value="500">500x500</option>
+              <option value="800">800x800</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="downloadFormat">صيغة التحميل</label>
+            <select id="downloadFormat">
+              <option value="png">PNG</option>
+              <option value="jpg">JPG</option>
+              <option value="svg">SVG</option>
+              <option value="pdf">PDF</option>
+              <option value="docx">Word DOCX</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="primary-btn">إنشاء QR Code</button>
+          <button type="button" class="secondary-btn" id="downloadBtn" hidden>Download</button>
+          <button type="button" class="ghost-btn" id="resetBtn">Reset</button>
+        </div>
+      </form>
+
+      <aside class="preview-panel">
+        <div class="section-title">
+          <h2>المعاينة</h2>
+          <p>سيظهر QR Code هنا بعد الإنشاء.</p>
+        </div>
+
+        <div class="qr-card">
+          <div id="qrPreview" class="qr-preview">
+            <span>لم يتم إنشاء QR بعد</span>
+          </div>
+        </div>
+
+        <div class="link-preview" id="linkPreview"></div>
+      </aside>
+    </section>
+  </main>
+
+  <footer>
+    <p>QR Code Generator © جميع الحقوق محفوظة</p>
+  </footer>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
