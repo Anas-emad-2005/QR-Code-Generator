@@ -1,5 +1,6 @@
 const urlInput = document.getElementById("urlInput");
 const urlError = document.getElementById("urlError");
+const urlHelper = document.getElementById("urlHelper");
 const qrForm = document.getElementById("qrForm");
 const qrPreview = document.getElementById("qrPreview");
 const downloadBtn = document.getElementById("downloadBtn");
@@ -112,6 +113,8 @@ function collectProfileData() {
       instagram: getInputValue("instagramLink"),
       telegram: getInputValue("telegramLink"),
       youtube: getInputValue("youtubeLink"),
+      snapchat: getInputValue("snapchatLink"),
+      tiktok: getInputValue("tiktokLink"),
       linkedin: getInputValue("linkedinLink"),
       website: getInputValue("websiteLink")
     }
@@ -129,6 +132,8 @@ function validateProfileData(data) {
     [data.links.instagram, "Instagram"],
     [data.links.telegram, "Telegram"],
     [data.links.youtube, "YouTube"],
+    [data.links.snapchat, "Snapchat"],
+    [data.links.tiktok, "TikTok"],
     [data.links.linkedin, "LinkedIn"],
     [data.links.website, "Website"]
   ];
@@ -221,6 +226,7 @@ function createQrCode() {
     openProfileBtn.hidden = qrType.value !== "profile";
     linkPreview.textContent = qrType.value === "profile" ? "تم إنشاء رابط بطاقة مخفي البيانات داخل QR" : qrData;
     linkPreview.classList.add("show");
+    updateQrTypeUi();
     showToast("تم إنشاء QR بنجاح", "success");
   } catch {
     showToast("حدث خطأ أثناء إنشاء QR", "error");
@@ -354,8 +360,7 @@ function resetForm() {
     button.classList.toggle("active", button.dataset.color === "#111827");
   });
 
-  urlFields.classList.remove("hidden");
-  profileFields.classList.add("hidden");
+  updateQrTypeUi();
   qrPreview.innerHTML = "<span>لم يتم إنشاء QR بعد</span>";
   downloadBtn.hidden = true;
   openProfileBtn.hidden = true;
@@ -389,32 +394,58 @@ presetColors.addEventListener("click", event => {
   button.classList.add("active");
   currentQrColor = button.dataset.color;
   customColor.value = currentQrColor;
-  updateContrastWarning();
+  updateQrTypeUi();
+updateContrastWarning();
 });
 
 customColor.addEventListener("input", () => {
   currentQrColor = customColor.value;
   document.querySelectorAll(".color-dot").forEach(item => item.classList.remove("active"));
-  updateContrastWarning();
+  updateQrTypeUi();
+updateContrastWarning();
 });
 
 backgroundColor.addEventListener("input", updateContrastWarning);
 
+function updateQrTypeUi() {
+  const isProfile = qrType.value === "profile";
+
+  profileFields.classList.toggle("hidden", !isProfile);
+  urlFields.classList.remove("hidden");
+
+  urlInput.disabled = isProfile;
+  urlInput.required = !isProfile;
+  copyBtn.disabled = isProfile && !generatedUrl;
+
+  if (isProfile) {
+    urlInput.value = "";
+    urlInput.placeholder = "سيتم إنشاء رابط البطاقة تلقائياً";
+    urlHelper.textContent = "حقل الرابط العادي مغلق وغير إجباري عند اختيار بطاقة شخصية رقمية.";
+    copyBtn.textContent = generatedUrl ? "نسخ رابط البطاقة" : "نسخ";
+    urlError.textContent = "";
+  } else {
+    urlInput.placeholder = "https://example.com";
+    urlHelper.textContent = "هذا الحقل مطلوب فقط عند اختيار رابط عادي.";
+    copyBtn.textContent = "نسخ";
+  }
+}
+
 qrType.addEventListener("change", () => {
   urlError.textContent = "";
-  urlFields.classList.toggle("hidden", qrType.value !== "url");
-  profileFields.classList.toggle("hidden", qrType.value !== "profile");
   openProfileBtn.hidden = true;
   downloadBtn.hidden = true;
   qrCode = null;
   generatedUrl = "";
   qrPreview.innerHTML = "<span>لم يتم إنشاء QR بعد</span>";
   linkPreview.classList.remove("show");
+  linkPreview.textContent = "";
+  updateQrTypeUi();
 });
 
 qrForm.addEventListener("submit", event => {
   event.preventDefault();
-  updateContrastWarning();
+  updateQrTypeUi();
+updateContrastWarning();
   createQrCode();
 });
 
@@ -425,4 +456,5 @@ openProfileBtn.addEventListener("click", () => {
   if (generatedUrl) window.open(generatedUrl, "_blank");
 });
 
+updateQrTypeUi();
 updateContrastWarning();

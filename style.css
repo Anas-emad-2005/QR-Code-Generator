@@ -285,6 +285,26 @@ button {
   display: block;
 }
 
+
+.helper-text {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+input:disabled {
+  background: #eef2f7;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 .error-text {
   color: var(--danger);
   display: block;
@@ -513,4 +533,67 @@ textarea:focus {
   text-align: center;
   color: var(--danger);
   font-weight: 800;
+}
+
+.profile-link-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.profile-link-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-link-action {
+  color: var(--muted);
+  font-weight: 700;
+  direction: ltr;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 55%;
+}
+
+.profile-icon {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 12px;
+  display: inline-grid;
+  place-items: center;
+  color: #ffffff;
+  background: var(--primary);
+}
+
+.profile-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.profile-icon-phone { background: #0f172a; }
+.profile-icon-whatsapp { background: #16a34a; }
+.profile-icon-facebook { background: #1877f2; }
+.profile-icon-instagram { background: linear-gradient(135deg, #f97316, #db2777, #7c3aed); }
+.profile-icon-telegram { background: #229ed9; }
+.profile-icon-youtube { background: #dc2626; }
+.profile-icon-snapchat { background: #facc15; color: #111827; }
+.profile-icon-tiktok { background: #111827; }
+.profile-icon-linkedin { background: #0a66c2; }
+.profile-icon-website { background: #2563eb; }
+
+@media (max-width: 420px) {
+  .profile-link {
+    align-items: flex-start;
+  }
+
+  .profile-link-action {
+    max-width: 44%;
+    font-size: 13px;
+  }
 }

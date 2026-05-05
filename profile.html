@@ -51,10 +51,32 @@
       return "";
     }
 
-    function createLink(label, href) {
+    const iconLibrary = {
+      phone: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.5 3 3.6 5.1 6.6 6.6l2.2-2.2c.3-.3.8-.4 1.2-.3 1.3.4 2.6.6 4 .6.7 0 1.2.5 1.2 1.2v3.5c0 .7-.5 1.2-1.2 1.2C10.2 22 2 13.8 2 3.4 2 2.7 2.5 2.2 3.2 2.2h3.6c.7 0 1.2.5 1.2 1.2 0 1.4.2 2.7.6 4 .1.4 0 .9-.3 1.2l-1.7 2.2Z"/></svg>`,
+      whatsapp: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.1 2C6.6 2 2.2 6.4 2.2 11.8c0 1.8.5 3.5 1.3 5L2 22l5.4-1.4c1.4.8 3 1.1 4.7 1.1 5.4 0 9.8-4.4 9.8-9.8S17.5 2 12.1 2Zm0 18c-1.5 0-2.9-.4-4.1-1.1l-.3-.2-3.2.8.9-3.1-.2-.3c-.8-1.3-1.2-2.7-1.2-4.3 0-4.4 3.6-8.1 8.1-8.1s8.1 3.6 8.1 8.1-3.7 8.2-8.1 8.2Zm4.5-6.1c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.8 1-.1.2-.3.2-.5.1-.2-.1-1-.4-1.9-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5.1-.1.2-.3.4-.4.1-.1.2-.2.3-.4.1-.1.1-.3 0-.4 0-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 2s.8 2.3 1 2.5c.1.2 1.7 2.7 4.2 3.7.6.3 1 .4 1.4.5.6.2 1.1.2 1.5.1.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .1-1.1 0-.2-.2-.2-.5-.3Z"/></svg>`,
+      facebook: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.2 8.4V6.7c0-.8.5-1 1-1h2.4V2.2L14.3 2c-3.3 0-5.4 2-5.4 5.6v.8H6v3.9h2.9V22h4.2v-9.7h3.3l.6-3.9h-3.8Z"/></svg>`,
+      instagram: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 2h9C19.5 2 22 4.5 22 7.5v9c0 3-2.5 5.5-5.5 5.5h-9C4.5 22 2 19.5 2 16.5v-9C2 4.5 4.5 2 7.5 2Zm0 2C5.6 4 4 5.6 4 7.5v9C4 18.4 5.6 20 7.5 20h9c1.9 0 3.5-1.6 3.5-3.5v-9C20 5.6 18.4 4 16.5 4h-9Zm4.5 3.3a4.7 4.7 0 1 1 0 9.4 4.7 4.7 0 0 1 0-9.4Zm0 2a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 0 0 0-5.4Zm5.1-2.7a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"/></svg>`,
+      telegram: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.8 4.4 18.6 20c-.2 1-.8 1.2-1.6.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9.1-8.2c.4-.4-.1-.6-.6-.3L6.3 13.5 1.5 12c-1-.3-1-1 .2-1.5L20.4 3.3c.9-.3 1.6.2 1.4 1.1Z"/></svg>`,
+      youtube: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.6 7.2s-.2-1.6-.9-2.3c-.9-.9-1.9-.9-2.3-1C15.2 3.7 12 3.7 12 3.7s-3.2 0-6.4.2c-.5.1-1.5.1-2.3 1-.7.7-.9 2.3-.9 2.3S2.2 9.1 2.2 11v1.8c0 1.9.2 3.8.2 3.8s.2 1.6.9 2.3c.9.9 2.1.9 2.6 1 1.9.2 6.1.2 6.1.2s3.2 0 6.4-.2c.5-.1 1.5-.1 2.3-1 .7-.7.9-2.3.9-2.3s.2-1.9.2-3.8V11c0-1.9-.2-3.8-.2-3.8ZM10.1 14.9V8.3l5.8 3.3-5.8 3.3Z"/></svg>`,
+      snapchat: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3 0 5.2 2.4 5.2 5.5v2c0 .4.1.6.5.8.5.3 1.1.1 1.6.4.3.2.3.7 0 1-.5.5-1.3.7-2 .9.4 1.2 1.4 2.1 2.6 2.5.5.2.6.9.1 1.2-.7.4-1.5.5-2.3.6-.3.5-.6 1.1-1.3 1.1-.5 0-1-.2-1.5-.2-1 0-1.8.8-2.9.8s-1.9-.8-2.9-.8c-.5 0-1 .2-1.5.2-.7 0-1-.6-1.3-1.1-.8-.1-1.6-.2-2.3-.6-.5-.3-.4-1 .1-1.2 1.2-.4 2.2-1.3 2.6-2.5-.7-.2-1.5-.4-2-.9-.3-.3-.3-.8 0-1 .5-.3 1.1-.1 1.6-.4.4-.2.5-.4.5-.8v-2C6.8 4.6 9 2.2 12 2.2Z"/></svg>`,
+      tiktok: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.5 2c.3 2.4 1.7 4 4 4.2v3.5c-1.5 0-2.8-.4-4-1.2v6.8c0 4-2.7 6.7-6.4 6.7-3.3 0-6.1-2.6-6.1-5.9 0-3.5 2.9-6.1 6.5-5.8v3.7c-1.4-.4-2.8.6-2.8 2.1 0 1.2 1 2.2 2.3 2.2 1.5 0 2.5-1 2.5-2.8V2h4Z"/></svg>`,
+      linkedin: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.9 8.8H3.1V22h3.8V8.8ZM5 2.2A2.2 2.2 0 1 0 5 6.6a2.2 2.2 0 0 0 0-4.4Zm16 12.2c0-3.5-1.9-5.8-4.9-5.8-2.2 0-3.2 1.2-3.8 2V8.8H8.6V22h3.8v-6.8c0-1.8.3-3.5 2.5-3.5 2.1 0 2.1 2 2.1 3.6V22h3.8v-7.6Z"/></svg>`,
+      website: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm6.9 9h-3.1c-.1-2-.6-3.8-1.3-5.1A8.1 8.1 0 0 1 18.9 11ZM12 4.1c.8 1.1 1.5 3.5 1.7 6.9h-3.4c.2-3.4.9-5.8 1.7-6.9ZM4.3 13h3.9c.1 2 .6 3.8 1.3 5.1A8 8 0 0 1 4.3 13Zm3.9-2H4.3a8 8 0 0 1 5.2-5.1C8.8 7.2 8.3 9 8.2 11Zm3.8 8.9c-.8-1.1-1.5-3.5-1.7-6.9h3.4c-.2 3.4-.9 5.8-1.7 6.9Zm2.5-1.8c.7-1.3 1.2-3.1 1.3-5.1h3.1a8.1 8.1 0 0 1-4.4 5.1Z"/></svg>`
+    };
+
+    function createIcon(name) {
+      const icon = iconLibrary[name] || iconLibrary.website;
+      return `<span class="profile-icon profile-icon-${escapeHtml(name)}">${icon}</span>`;
+    }
+
+    function createLink(label, href, iconName) {
       const safeUrl = safeHref(href);
       if (!safeUrl) return "";
-      return `<a class="profile-link" href="${safeUrl}" target="_blank" rel="noopener"><span>${escapeHtml(label)}</span><span>↗</span></a>`;
+      return `
+        <a class="profile-link" href="${safeUrl}" target="_blank" rel="noopener">
+          <span class="profile-link-main">${createIcon(iconName)}<span class="profile-link-title">${escapeHtml(label)}</span></span>
+          <span class="profile-link-action">↗</span>
+        </a>`;
     }
 
     function renderError() {
@@ -63,8 +85,8 @@
 
     function renderProfile(data) {
       const firstLetter = safeText(data.name).trim().charAt(0).toUpperCase() || "Q";
-      const phoneLink = data.phone ? `<a class="profile-link" href="tel:${escapeHtml(data.phone)}"><span>اتصال مباشر</span><span>${escapeHtml(data.phone)}</span></a>` : "";
-      const whatsappLink = data.whatsapp ? `<a class="profile-link" href="https://wa.me/${data.whatsapp.replace(/\D/g, "")}" target="_blank" rel="noopener"><span>WhatsApp</span><span>مراسلة</span></a>` : "";
+      const phoneLink = data.phone ? `<a class="profile-link" href="tel:${escapeHtml(data.phone)}"><span class="profile-link-main">${createIcon("phone")}<span class="profile-link-title">اتصال مباشر</span></span><span class="profile-link-action">${escapeHtml(data.phone)}</span></a>` : "";
+      const whatsappLink = data.whatsapp ? `<a class="profile-link" href="https://wa.me/${data.whatsapp.replace(/\D/g, "")}" target="_blank" rel="noopener"><span class="profile-link-main">${createIcon("whatsapp")}<span class="profile-link-title">WhatsApp</span></span><span class="profile-link-action">مراسلة</span></a>` : "";
 
       profilePage.innerHTML = `
         <section class="profile-card-view">
@@ -77,12 +99,14 @@
             <div class="profile-links">
               ${phoneLink}
               ${whatsappLink}
-              ${createLink("Facebook", data.links?.facebook)}
-              ${createLink("Instagram", data.links?.instagram)}
-              ${createLink("Telegram", data.links?.telegram)}
-              ${createLink("YouTube", data.links?.youtube)}
-              ${createLink("LinkedIn", data.links?.linkedin)}
-              ${createLink("Website", data.links?.website)}
+              ${createLink("Facebook", data.links?.facebook, "facebook")}
+              ${createLink("Instagram", data.links?.instagram, "instagram")}
+              ${createLink("Telegram", data.links?.telegram, "telegram")}
+              ${createLink("YouTube", data.links?.youtube, "youtube")}
+              ${createLink("Snapchat", data.links?.snapchat, "snapchat")}
+              ${createLink("TikTok", data.links?.tiktok, "tiktok")}
+              ${createLink("LinkedIn", data.links?.linkedin, "linkedin")}
+              ${createLink("Website", data.links?.website, "website")}
             </div>
           </div>
         </section>
