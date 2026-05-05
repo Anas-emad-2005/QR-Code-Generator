@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="profile-page" id="profilePage"></main>
+  <script>
+    const secretKey = "qr-profile-front-end-key";
+    const profilePage = document.getElementById("profilePage");
+
+    function base64UrlDecode(value) {
+      const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+      const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, "=");
+      const binary = atob(padded);
+      return Uint8Array.from(binary, char => char.charCodeAt(0));
+    }
+
+    function decodeProfileData(token) {
+      const bytes = base64UrlDecode(token);
+      const keyBytes = new TextEncoder().encode(secretKey);
+      const output = bytes.map((byte, index) => byte ^ keyBytes[index % keyBytes.length]);
+      const json = new TextDecoder().decode(output);
+      return JSON.parse(json);
+    }
+
+    function safeText(value) {
+      return String(value || "");
+    }
+
+    function escapeHtml(value) {
+      return safeText(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function safeHref(value) {
+      try {
+        const url = new URL(value);
+        if (url.protocol === "http:" || url.protocol === "https:") return url.href;
+      } catch {}
+      return "";
+    }
+
+    function createLink(label, href) {
+      const safeUrl = safeHref(href);
+      if (!safeUrl) return "";
+      return `<a class="profile-link" href="${safeUrl}" target="_blank" rel="noopener"><span>${escapeHtml(label)}</span><span>↗</span></a>`;
+    }
+
+    function renderError() {
+      profilePage.innerHTML = `<div class="profile-error">تعذر قراءة بيانات البطاقة. تأكد من استعمال QR صحيح.</div>`;
+    }
+
+    function renderProfile(data) {
+      const firstLetter = safeText(data.name).trim().charAt(0).toUpperCase() || "Q";
+      const phoneLink = data.phone ? `<a class="profile-link" href="tel:${escapeHtml(data.phone)}"><span>اتصال مباشر</span><span>${escapeHtml(data.phone)}</span></a>` : "";
+      const whatsappLink = data.whatsapp ? `<a class="profile-link" href="https://wa.me/${data.whatsapp.replace(/\D/g, "")}" target="_blank" rel="noopener"><span>WhatsApp</span><span>مراسلة</span></a>` : "";
+
+      profilePage.innerHTML = `
+        <section class="profile-card-view">
+          <div class="profile-cover"></div>
+          <div class="profile-content-view">
+            <div class="avatar-circle">${firstLetter}</div>
+            <h1>${escapeHtml(data.name)}</h1>
+            <p class="title">${escapeHtml(data.title)}</p>
+            <p class="bio">${escapeHtml(data.bio)}</p>
+            <div class="profile-links">
+              ${phoneLink}
+              ${whatsappLink}
+              ${createLink("Facebook", data.links?.facebook)}
+              ${createLink("Instagram", data.links?.instagram)}
+              ${createLink("Telegram", data.links?.telegram)}
+              ${createLink("YouTube", data.links?.youtube)}
+              ${createLink("LinkedIn", data.links?.linkedin)}
+              ${createLink("Website", data.links?.website)}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    try {
+      const params = new URLSearchParams(window.location.hash.replace("#", ""));
+      const token = params.get("p");
+      if (!token) throw new Error("Missing token");
+      const data = decodeProfileData(token);
+      renderProfile(data);
+    } catch {
+      renderError();
+    }
+  </script>
+</body>
+</html>

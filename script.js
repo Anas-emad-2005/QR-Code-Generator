@@ -13,10 +13,16 @@ const toastContainer = document.getElementById("toastContainer");
 const contrastWarning = document.getElementById("contrastWarning");
 const presetColors = document.getElementById("presetColors");
 const linkPreview = document.getElementById("linkPreview");
+const qrType = document.getElementById("qrType");
+const urlFields = document.getElementById("urlFields");
+const profileFields = document.getElementById("profileFields");
+const openProfileBtn = document.getElementById("openProfileBtn");
 
 let qrCode = null;
 let generatedUrl = "";
 let currentQrColor = "#111827";
+
+const secretKey = "qr-profile-front-end-key";
 
 function isValidUrl(value) {
   try {
@@ -33,9 +39,7 @@ function showToast(message, type = "success") {
   toast.textContent = message;
   toastContainer.appendChild(toast);
 
-  setTimeout(() => {
-    toast.remove();
-  }, 2800);
+  setTimeout(() => toast.remove(), 2800);
 }
 
 function hexToRgb(hex) {
@@ -64,7 +68,6 @@ function getContrastRatio(colorOne, colorTwo) {
   const lumTwo = getLuminance(colorTwo);
   const brightest = Math.max(lumOne, lumTwo);
   const darkest = Math.min(lumOne, lumTwo);
-
   return (brightest + 0.05) / (darkest + 0.05);
 }
 
@@ -73,36 +76,124 @@ function updateContrastWarning() {
   contrastWarning.classList.toggle("show", ratio < 4.5);
 }
 
-function clearPreviewMessage() {
-  qrPreview.innerHTML = "";
+function base64UrlEncode(bytes) {
+  let binary = "";
+  bytes.forEach(byte => binary += String.fromCharCode(byte));
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function encodeProfileData(data) {
+  const json = JSON.stringify(data);
+  const bytes = new TextEncoder().encode(json);
+  const keyBytes = new TextEncoder().encode(secretKey);
+  const output = bytes.map((byte, index) => byte ^ keyBytes[index % keyBytes.length]);
+  return base64UrlEncode(output);
+}
+
+function getInputValue(id) {
+  return document.getElementById(id).value.trim();
+}
+
+function validateOptionalUrl(value, label) {
+  if (!value) return "";
+  if (!isValidUrl(value)) return `${label} يجب أن يكون رابطاً صحيحاً يبدأ بـ http أو https`;
+  return "";
+}
+
+function collectProfileData() {
+  return {
+    name: getInputValue("profileName"),
+    title: getInputValue("profileTitle"),
+    phone: getInputValue("profilePhone"),
+    whatsapp: getInputValue("profileWhatsapp"),
+    bio: getInputValue("profileBio"),
+    links: {
+      facebook: getInputValue("facebookLink"),
+      instagram: getInputValue("instagramLink"),
+      telegram: getInputValue("telegramLink"),
+      youtube: getInputValue("youtubeLink"),
+      linkedin: getInputValue("linkedinLink"),
+      website: getInputValue("websiteLink")
+    }
+  };
+}
+
+function validateProfileData(data) {
+  if (!data.name) return "الرجاء إدخال الاسم.";
+  if (!data.phone && !data.whatsapp && !Object.values(data.links).some(Boolean)) {
+    return "أدخل رقم هاتف أو رابط واحد على الأقل.";
+  }
+
+  const checks = [
+    [data.links.facebook, "Facebook"],
+    [data.links.instagram, "Instagram"],
+    [data.links.telegram, "Telegram"],
+    [data.links.youtube, "YouTube"],
+    [data.links.linkedin, "LinkedIn"],
+    [data.links.website, "Website"]
+  ];
+
+  for (const [value, label] of checks) {
+    const error = validateOptionalUrl(value, label);
+    if (error) return error;
+  }
+
+  return "";
+}
+
+function buildProfileUrl() {
+  const data = collectProfileData();
+  const error = validateProfileData(data);
+
+  if (error) {
+    urlError.textContent = error;
+    showToast(error, "error");
+    return "";
+  }
+
+  const encoded = encodeProfileData(data);
+  const basePath = window.location.href.substring(0, window.location.href.lastIndexOf("/") + 1);
+  return `${basePath}profile.html#p=${encoded}`;
+}
+
+function buildQrData() {
+  urlError.textContent = "";
+
+  if (qrType.value === "url") {
+    const link = urlInput.value.trim();
+
+    if (!link) {
+      urlError.textContent = "الرجاء إدخال رابط.";
+      showToast("الرجاء إدخال رابط صحيح", "error");
+      return "";
+    }
+
+    if (!isValidUrl(link)) {
+      urlError.textContent = "الرابط غير صحيح. يجب أن يبدأ بـ http أو https.";
+      showToast("الرجاء إدخال رابط صحيح", "error");
+      return "";
+    }
+
+    return link;
+  }
+
+  return buildProfileUrl();
 }
 
 function createQrCode() {
-  const link = urlInput.value.trim();
+  const qrData = buildQrData();
   const size = Number(qrSize.value);
 
-  urlError.textContent = "";
-
-  if (!link) {
-    urlError.textContent = "الرجاء إدخال رابط.";
-    showToast("الرجاء إدخال رابط صحيح", "error");
-    return;
-  }
-
-  if (!isValidUrl(link)) {
-    urlError.textContent = "الرابط غير صحيح. يجب أن يبدأ بـ http أو https.";
-    showToast("الرجاء إدخال رابط صحيح", "error");
-    return;
-  }
+  if (!qrData) return;
 
   try {
-    clearPreviewMessage();
+    qrPreview.innerHTML = "";
 
     qrCode = new QRCodeStyling({
       width: size,
       height: size,
       type: "canvas",
-      data: link,
+      data: qrData,
       image: "",
       dotsOptions: {
         color: currentQrColor,
@@ -125,21 +216,19 @@ function createQrCode() {
     });
 
     qrCode.append(qrPreview);
-    generatedUrl = link;
+    generatedUrl = qrData;
     downloadBtn.hidden = false;
-    linkPreview.textContent = link;
+    openProfileBtn.hidden = qrType.value !== "profile";
+    linkPreview.textContent = qrType.value === "profile" ? "تم إنشاء رابط بطاقة مخفي البيانات داخل QR" : qrData;
     linkPreview.classList.add("show");
     showToast("تم إنشاء QR بنجاح", "success");
-  } catch (error) {
+  } catch {
     showToast("حدث خطأ أثناء إنشاء QR", "error");
   }
 }
 
 async function getQrBlob(format = "png") {
-  if (!qrCode) {
-    throw new Error("QR غير موجود");
-  }
-
+  if (!qrCode) throw new Error("QR غير موجود");
   return await qrCode.getRawData(format);
 }
 
@@ -173,7 +262,6 @@ async function downloadJpg() {
     const canvas = document.createElement("canvas");
     canvas.width = image.width;
     canvas.height = image.height;
-
     const context = canvas.getContext("2d");
     context.fillStyle = backgroundColor.value;
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -199,17 +287,13 @@ async function downloadPdf() {
 
   reader.onload = () => {
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4"
-    });
-
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     pdf.setFontSize(18);
     pdf.text("QR Code Generator", 105, 25, { align: "center" });
     pdf.addImage(reader.result, "PNG", 55, 42, 100, 100);
     pdf.setFontSize(11);
-    pdf.text(generatedUrl, 105, 155, { align: "center", maxWidth: 170 });
+    const text = qrType.value === "profile" ? "Digital Profile QR" : generatedUrl;
+    pdf.text(text, 105, 155, { align: "center", maxWidth: 170 });
     pdf.save("qr-code.pdf");
   };
 
@@ -219,48 +303,16 @@ async function downloadPdf() {
 async function downloadDocx() {
   const pngBlob = await getQrBlob("png");
   const arrayBuffer = await pngBlob.arrayBuffer();
-
   const { Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType } = docx;
 
   const document = new Document({
-    sections: [
-      {
-        children: [
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-              new TextRun({
-                text: "QR Code Generator",
-                bold: true,
-                size: 34
-              })
-            ]
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            spacing: { before: 300, after: 300 },
-            children: [
-              new TextRun({
-                text: generatedUrl,
-                size: 22
-              })
-            ]
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-              new ImageRun({
-                data: arrayBuffer,
-                transformation: {
-                  width: 260,
-                  height: 260
-                }
-              })
-            ]
-          })
-        ]
-      }
-    ]
+    sections: [{
+      children: [
+        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "QR Code Generator", bold: true, size: 34 })] }),
+        new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 300, after: 300 }, children: [new TextRun({ text: qrType.value === "profile" ? "Digital Profile QR" : generatedUrl, size: 22 })] }),
+        new Paragraph({ alignment: AlignmentType.CENTER, children: [new ImageRun({ data: arrayBuffer, transformation: { width: 260, height: 260 } })] })
+      ]
+    }]
   });
 
   const blob = await Packer.toBlob(document);
@@ -275,26 +327,25 @@ async function handleDownload() {
 
   try {
     const format = downloadFormat.value;
-
     if (format === "png") await downloadPng();
     if (format === "jpg") await downloadJpg();
     if (format === "svg") await downloadSvg();
     if (format === "pdf") await downloadPdf();
     if (format === "docx") await downloadDocx();
-
     showToast("تم تحميل الملف بنجاح", "success");
-  } catch (error) {
+  } catch {
     showToast("حدث خطأ أثناء التحميل", "error");
   }
 }
 
 function resetForm() {
-  urlInput.value = "";
+  qrForm.reset();
   urlError.textContent = "";
   customColor.value = "#111827";
   backgroundColor.value = "#ffffff";
   qrSize.value = "300";
   downloadFormat.value = "png";
+  qrType.value = "url";
   currentQrColor = "#111827";
   qrCode = null;
   generatedUrl = "";
@@ -303,8 +354,11 @@ function resetForm() {
     button.classList.toggle("active", button.dataset.color === "#111827");
   });
 
+  urlFields.classList.remove("hidden");
+  profileFields.classList.add("hidden");
   qrPreview.innerHTML = "<span>لم يتم إنشاء QR بعد</span>";
   downloadBtn.hidden = true;
+  openProfileBtn.hidden = true;
   contrastWarning.classList.remove("show");
   linkPreview.classList.remove("show");
   linkPreview.textContent = "";
@@ -312,9 +366,9 @@ function resetForm() {
 }
 
 async function copyInputLink() {
-  const link = urlInput.value.trim();
+  const link = qrType.value === "profile" ? generatedUrl : urlInput.value.trim();
 
-  if (!link || !isValidUrl(link)) {
+  if (!link || (qrType.value === "url" && !isValidUrl(link))) {
     showToast("لا يوجد رابط صحيح للنسخ", "error");
     return;
   }
@@ -333,7 +387,6 @@ presetColors.addEventListener("click", event => {
 
   document.querySelectorAll(".color-dot").forEach(item => item.classList.remove("active"));
   button.classList.add("active");
-
   currentQrColor = button.dataset.color;
   customColor.value = currentQrColor;
   updateContrastWarning();
@@ -347,6 +400,18 @@ customColor.addEventListener("input", () => {
 
 backgroundColor.addEventListener("input", updateContrastWarning);
 
+qrType.addEventListener("change", () => {
+  urlError.textContent = "";
+  urlFields.classList.toggle("hidden", qrType.value !== "url");
+  profileFields.classList.toggle("hidden", qrType.value !== "profile");
+  openProfileBtn.hidden = true;
+  downloadBtn.hidden = true;
+  qrCode = null;
+  generatedUrl = "";
+  qrPreview.innerHTML = "<span>لم يتم إنشاء QR بعد</span>";
+  linkPreview.classList.remove("show");
+});
+
 qrForm.addEventListener("submit", event => {
   event.preventDefault();
   updateContrastWarning();
@@ -356,5 +421,8 @@ qrForm.addEventListener("submit", event => {
 downloadBtn.addEventListener("click", handleDownload);
 resetBtn.addEventListener("click", resetForm);
 copyBtn.addEventListener("click", copyInputLink);
+openProfileBtn.addEventListener("click", () => {
+  if (generatedUrl) window.open(generatedUrl, "_blank");
+});
 
 updateContrastWarning();

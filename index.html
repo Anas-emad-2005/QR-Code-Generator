@@ -21,7 +21,7 @@
       <div class="hero-content">
         <span class="badge">Anas Emad</span>
         <h1>QR Code Generator</h1>
-        <p>أداة بسيطة واحترافية لتوليد QR Code من أي رابط، مع تخصيص اللون والحجم وتحميله بعدة صيغ.</p>
+        <p>أنشئ QR لرابط عادي أو بطاقة شخصية رقمية تعرض حساباتك ورقم هاتفك بدون Backend.</p>
       </div>
     </section>
 
@@ -29,16 +29,92 @@
       <form class="control-panel" id="qrForm">
         <div class="section-title">
           <h2>الإعدادات</h2>
-          <p>أدخل الرابط وعدّل خيارات التصميم.</p>
+          <p>اختر نوع QR ثم أدخل البيانات المطلوبة.</p>
         </div>
 
         <div class="form-group">
-          <label for="urlInput">الرابط</label>
-          <div class="input-row">
-            <input type="url" id="urlInput" placeholder="https://example.com" autocomplete="off" />
-            <button type="button" class="secondary-btn" id="copyBtn">نسخ</button>
+          <label for="qrType">نوع QR</label>
+          <select id="qrType">
+            <option value="url" selected>رابط عادي</option>
+            <option value="profile">بطاقة شخصية رقمية</option>
+          </select>
+        </div>
+
+        <div id="urlFields">
+          <div class="form-group">
+            <label for="urlInput">الرابط</label>
+            <div class="input-row">
+              <input type="url" id="urlInput" placeholder="https://example.com" autocomplete="off" />
+              <button type="button" class="secondary-btn" id="copyBtn">نسخ</button>
+            </div>
+            <small id="urlError" class="error-text"></small>
           </div>
-          <small id="urlError" class="error-text"></small>
+        </div>
+
+        <div id="profileFields" class="hidden">
+          <div class="profile-note">
+            سيتم توليد رابط للبطاقة بصيغة <span dir="ltr">profile.html#p=...</span>. البيانات لا تظهر كنص واضح في الرابط، لكنها ليست حماية أمنية كاملة بدون Backend.
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="profileName">الاسم</label>
+              <input type="text" id="profileName" placeholder="مثال: Anas Emad" />
+            </div>
+            <div class="form-group">
+              <label for="profileTitle">الوصف أو التخصص</label>
+              <input type="text" id="profileTitle" placeholder="مثال: Web Developer" />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="profilePhone">رقم الهاتف</label>
+              <input type="tel" id="profilePhone" placeholder="+218XXXXXXXXX" />
+            </div>
+            <div class="form-group">
+              <label for="profileWhatsapp">واتساب</label>
+              <input type="tel" id="profileWhatsapp" placeholder="218XXXXXXXXX" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="profileBio">نبذة قصيرة</label>
+            <textarea id="profileBio" placeholder="اكتب نبذة بسيطة تظهر في البطاقة"></textarea>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="facebookLink">Facebook</label>
+              <input type="url" id="facebookLink" placeholder="https://facebook.com/..." />
+            </div>
+            <div class="form-group">
+              <label for="instagramLink">Instagram</label>
+              <input type="url" id="instagramLink" placeholder="https://instagram.com/..." />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="telegramLink">Telegram</label>
+              <input type="url" id="telegramLink" placeholder="https://t.me/..." />
+            </div>
+            <div class="form-group">
+              <label for="youtubeLink">YouTube</label>
+              <input type="url" id="youtubeLink" placeholder="https://youtube.com/..." />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="linkedinLink">LinkedIn</label>
+              <input type="url" id="linkedinLink" placeholder="https://linkedin.com/in/..." />
+            </div>
+            <div class="form-group">
+              <label for="websiteLink">Website</label>
+              <input type="url" id="websiteLink" placeholder="https://example.com" />
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
@@ -95,6 +171,7 @@
         <div class="actions">
           <button type="submit" class="primary-btn">إنشاء QR Code</button>
           <button type="button" class="secondary-btn" id="downloadBtn" hidden>Download</button>
+          <button type="button" class="ghost-btn" id="openProfileBtn" hidden>فتح البطاقة</button>
           <button type="button" class="ghost-btn" id="resetBtn">Reset</button>
         </div>
       </form>
